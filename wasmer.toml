@@ -1,0 +1,10 @@
+[package]
+name = "game-night-website"
+version = "0.1.0"
+description = "Interactive quiz game website with multiple categories and a live leaderboard system"
+
+[dependencies]
+python = "^3.9"
+
+[scripts]
+start = "python server.py"
