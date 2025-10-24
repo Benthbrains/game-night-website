@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Game Night Website 🚀 - Created by Benjamin</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/0.3.0/css/chessboard-0.3.0.min.css">
+  <style>
+    body {
+      padding: 20px;
+      background: #000;
+      color: #fff;
+      font-family: 'Comic Sans MS', cursive, sans-serif; /* Fun font! */
+      min-height: 100vh;
+    }
+    /* Space moving background */
+    #space-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: #000;
+      overflow: hidden;
+    }
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      animation: moveStar linear infinite;
+    }
+    @keyframes moveStar {
+      from { transform: translateY(0); }
+      to { transform: translateY(100vh); }
+    }
+    .tab-content { margin-top: 20px; background: rgba(0, 0, 0, 0.7); padding: 20px; border-radius: 15px; }
+    .list-group-item { white-space: pre-wrap; background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid #fff; }
+    .nav-tabs .nav-link { color: #fff; border: 1px solid #fff; }
+    .nav-tabs .nav-link.active { background: #ff69b4; color: #000; } /* Hot pink for fun! */
+    h1, h2, h3 { color: #ff69b4; text-shadow: 0 0 10px #ff69b4; } /* Glowing fun headers */
+    .highlight-red-check { box-shadow: inset 0 0 3px 3px red; }
+    summary { cursor: pointer; color: #00ff00; } /* Green for answers */
+    button { background: #ff4500; color: #fff; border: none; padding: 10px; border-radius: 10px; } /* Fun orange button */
+    #chessboard { 
+      background: #fff; 
+      border-radius: 15px;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+    .chess-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .scroll-down {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff69b4;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+      z-index: 1000;
+      display: none;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    footer { text-align: center; margin-top: 20px; color: #ffd700; font-size: 1.2em; } /* Gold for creator credit */
+    .comment-section { margin-top: 10px; }
+    .comment-input { 
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid #ff69b4;
+      color: #fff;
+      padding: 5px;
+      border-radius: 5px;
+    }
+    .submit-answer {
+      background: #ff69b4;
+      color: #fff;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 5px;
+      margin-top: 5px;
+      cursor: pointer;
+    }
+    .answer-feedback {
+      margin-top: 5px;
+      font-style: italic;
+      color: #00ff00;
+    }
+    .score-display {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #ff69b4;
+      color: #fff;
+      z-index: 1000;
+    }
+    .correct-answer {
+      color: #00ff00;
+      font-weight: bold;
+    }
+    .incorrect-answer {
+      color: #ff4444;
+      font-weight: bold;
+    }
+    .name-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    .name-input-container {
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid #ff69b4;
+      text-align: center;
+    }
+    .name-input {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid #ff69b4;
+      color: #fff;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      width: 200px;
+    }
+    .start-button {
+      background: #ff69b4;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .leaderboard {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      border: 2px solid #ff69b4;
+      color: #fff;
+      z-index: 1000;
+      min-width: 200px;
+    }
+    .leaderboard-title {
+      color: #ff69b4;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .leaderboard-entry {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+      padding: 5px;
+      border-bottom: 1px solid rgba(255, 105, 180, 0.3);
+    }
+    .player-name {
+      color: #00ff00;
+    }
+    .player-score {
+      color: #ffd700;
+    }
+  </style>
+</head>
+<body>
+  <div class="score-display">
+    Score: <span id="score">0</span> / <span id="totalQuestions">0</span>
+    <div id="winMessage" style="display: none; color: #00ff00;">🎉 Congratulations! You've won! 🎉</div>
+  </div>
+  <div class="name-modal" id="nameModal">
+    <div class="name-input-container">
+      <h3 style="color: #ff69b4;">Welcome to Game Night! 🎮</h3>
+      <p>Enter your name to start:</p>
+      <input type="text" class="name-input" id="playerName" placeholder="Your name...">
+      <button class="start-button" id="startGame">Start Game! 🚀</button>
+    </div>
+  </div>
+  <div class="leaderboard">
+    <h4 class="leaderboard-title">🏆 Leaderboard 🏆</h4>
+    <div id="leaderboardEntries"></div>
+  </div>
+  <div id="space-bg"></div>
+  <div class="container">
+    <h1 class="text-center mb-4">Epic Game Night Adventures 🚀🌟</h1>
+    <ul class="nav nav-tabs" id="gameTabs" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="chess-tab" data-toggle="tab" href="#chess" role="tab">1️⃣ Chess Madness ♟️</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="coding-tab" data-toggle="tab" href="#coding" role="tab">2️⃣ Coding Shenanigans 💻</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="history-tab" data-toggle="tab" href="#history" role="tab">3️⃣ History Hijinks 📜</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="geography-tab" data-toggle="tab" href="#geography" role="tab">4️⃣ Geography Quests 🌍</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="ciphers-tab" data-toggle="tab" href="#ciphers" role="tab">5️⃣ Cipher Shenanigans 🔍</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="mini-tab" data-toggle="tab" href="#mini" role="tab">6️⃣ Mini Game Mayhem 🎉</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="chessgame-tab" data-toggle="tab" href="#chessgame" role="tab">♟️ Chess Battle Arena ⚔️</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="chess" role="tabpanel">
+        <h2>Chess Questions 🎲</h2>
+        <ol class="list-group list-group-flush">
+          <li class="list-group-item">
+            <details>
+              <summary>What move would you play as White to checkmate in 2 moves? Position FEN: 5rk1/ppp4Q/P7/8/8/8/PPPPPPP1/RNBQKBNR w - - 0 1 (View diagram: <a href="https://lichess.org/analysis/5rk1/ppp4Q/P7/8/8/8/PPPPPPP1/RNBQKBNR_w_-_-_0_1" target="_blank">Lichess Analysis</a>)</summary>
+              <div class="question" data-answer="1. Qh8+ Kxh8 2. Qh7#">
+                1. Qh8+ Kxh8 2. Qh7#
+                <div class="comment-section">
+                  <input type="text" class="comment-input" placeholder="Type your answer here...">
+                  <button class="submit-answer">Submit Answer</button>
+                  <div class="answer-feedback"></div>
+                </div>
+              </div>
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Identify if the following position is check, checkmate, or stalemate. Position FEN: rnbqkbnr/pppp1ppp/8/4p3/6Pq/5p2/PPPPPPPP/RNBQKBNR w KQkq - 0 3 (View: <a href="https://lichess.org/analysis/rnbqkbnr/pppp1ppp/8/4p3/6Pq/5p2/PPPPPPPP/RNBQKBNR_w_KQkq_-_0_3" target="_blank">Lichess</a>)</summary>
+              Checkmate (similar to Fool's Mate variant, white cannot move without the king being captured next turn).
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>List three openings you can play as White and explain the main ideas.</summary>
+              1. King's Pawn Opening (1. e4): Controls the center, opens lines for queen and bishop, aggressive play. 2. Queen's Pawn Opening (1. d4): Controls center, supports c4 for Queen's Gambit, solid. 3. English Opening (1. c4): Flank opening, controls d5, flexible development.
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Explain the difference between a pin, a fork, and a skewer.</summary>
+              Pin: A piece is pinned to a more valuable piece behind it, cannot move without exposing the valuable piece. Fork: A piece attacks two or more enemy pieces simultaneously. Skewer: An attack on two pieces in a line, where the front piece is valuable and moves, exposing the back one.
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>What is the best move for Black in this scenario? Position FEN: r3k3/8/8/8/8/8/8/K7 b - - 0 1 (View: <a href="https://lichess.org/analysis/r3k3/8/8/8/8/8/8/K7_b_-_-_0_1" target="_blank">Lichess</a>)</summary>
+              Ra1# (the rook moves to a1, checkmating the white king as the path is clear and the king has no escape).
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>What piece is worth 3 points, and which is worth 5 points?</summary>
+              Bishop and knight are worth 3 points each; rook is worth 5 points.
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Define castling and explain when it is legal.</summary>
+              Castling is a special move where the king and rook switch positions to protect the king. It is legal if neither has moved before, no pieces between them, the king is not in check, and the squares the king passes are not attacked.
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>What is en passant, and when can it be performed?</summary>
+              En passant is a special pawn capture where a pawn that has just advanced two squares can be captured by an adjacent enemy pawn as if it had advanced one square. It can only be performed on the next move immediately after the two-square advance.
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name two famous chess grandmasters and one of their achievements.</summary>
+              Magnus Carlsen: Current world champion, held the title since 2013. Garry Kasparov: World champion from 1985 to 2000, known for beating IBM's Deep Blue in 1996 (but losing in 1997).
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Explain the purpose of a gambit in chess.</summary>
+              A gambit is a chess opening where a player sacrifices material (usually a pawn) to achieve an advantage in development, position, or attack initiative.
+            </details>
+          </li>
+        </ol>
+      </div>
+      <div class="tab-pane fade" id="coding" role="tabpanel">
+        <h2>Coding & Logic Questions 🤖</h2>
+        <ol class="list-group list-group-flush">
+          <li class="list-group-item">
+            <details>
+              <summary>Write a JavaScript function to add two numbers.</summary>
+              function add(a, b) { return a + b; }
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Write a JavaScript function to reverse a string.</summary>
+              function reverse(str) { return str.split('').reverse().join(''); }
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Solve this logic puzzle: “Three knights are guarding keys. Knight A always tells the truth, Knight B always lies, Knight C sometimes tells the truth. Knight A says ‘Knight B has it.’ Who actually has the key?”</summary>
+              Knight B has the key (since A is truthful, his statement must be true, and the roles of B and C don't contradict as they don't speak).
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Convert the binary 01001000 01101001 to text.</summary>
+              Hi
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Encode the message “HELLO” with a Caesar cipher, shift = 3.</summary>
+              KHOOR
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Write a loop in JavaScript to print numbers 1 to 10.</summary>
+              for (let i = 1; i <= 10; i++) { console.log(i); }
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Write a function that takes a string and returns it in uppercase.</summary>
+              function toUpper(str) { return str.toUpperCase(); }
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Identify the output of this code: console.log(5 + '5');</summary>
+              '55' (type coercion makes it string concatenation)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Explain what a variable is in coding and give an example.</summary>
+              A variable is a named storage location for data. Example: let age = 25;
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>What does “if-else” do in programming?</summary>
+              It allows conditional execution of code: if a condition is true, execute one block; else, execute another.
+            </details>
+          </li>
+        </ol>
+      </div>
+      <div class="tab-pane fade" id="history" role="tabpanel">
+        <h2>History Questions 🏰</h2>
+        <ol class="list-group list-group-flush">
+          <li class="list-group-item">
+            <details>
+              <summary>Who was the first emperor of Rome?</summary>
+              Augustus (previously Octavian)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>What year was the first successful powered flight by the Wright brothers?</summary>
+              1903
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which civilization built Machu Picchu?</summary>
+              Inca
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name three inventions from the Renaissance period.</summary>
+              Printing press, telescope, microscope
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>When was the Eiffel Tower completed?</summary>
+              1889
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>What was the purpose of the shaduf in ancient Egypt?</summary>
+              To lift water for irrigation
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Who was Ada Lovelace and why is she important?</summary>
+              Mathematician and writer, considered the first computer programmer for her work on Charles Babbage's Analytical Engine.
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name one achievement of the Industrial Revolution.</summary>
+              Invention of the steam engine, leading to mechanized production.
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Who was the Pharaoh during the construction of the Great Pyramid?</summary>
+              Khufu
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name one major event from World War II.</summary>
+              D-Day invasion (June 6, 1944)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which two countries fought in the American Revolutionary War?</summary>
+              United States (colonies) and Great Britain
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>What year did the Berlin Wall fall?</summary>
+              1989
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Who was Cleopatra and what was she known for?</summary>
+              Last pharaoh of Ancient Egypt, known for her political alliances with Julius Caesar and Mark Antony.
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>What invention is Gutenberg famous for?</summary>
+              Printing press
+            </details>
+          </li>
+        </ol>
+      </div>
+      <div class="tab-pane fade" id="geography" role="tabpanel">
+        <h2>Geography Questions 🌌</h2>
+        <h3>Capitals & Continents 🗺️</h3>
+        <ol class="list-group list-group-flush">
+          <li class="list-group-item">
+            <details>
+              <summary>What is the capital of Canada, Australia, India, and Mexico?</summary>
+              Ottawa, Canberra, New Delhi, Mexico City
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which country is both in Europe and Asia?</summary>
+              Russia
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name the largest country by area in the world.</summary>
+              Russia
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which African country has the Nile River passing through it?</summary>
+              Egypt (among others like Sudan, Uganda)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Match each country to its continent: Egypt → ? Brazil → ? Japan → ? Russia → ? South Africa → ?</summary>
+              Egypt → Africa, Brazil → South America, Japan → Asia, Russia → Europe/Asia, South Africa → Africa
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which country has the most neighboring countries in Europe?</summary>
+              Germany (9 neighbors)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>What is the capital of the United States, China, Germany, and Brazil?</summary>
+              Washington, D.C., Beijing, Berlin, Brasília
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which countries form part of the United Kingdom?</summary>
+              England, Scotland, Wales, Northern Ireland
+            </details>
+          </li>
+        </ol>
+        <h3>Physical Geography / Landmarks ⛰️</h3>
+        <ol class="list-group list-group-flush" start="9">
+          <li class="list-group-item">
+            <details>
+              <summary>Name the tallest mountain in the world and the country it is located in.</summary>
+              Mount Everest, Nepal/China
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which countries does the Amazon River flow through?</summary>
+              Brazil, Peru, Colombia
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which desert is the largest in the world and where is it located?</summary>
+              Antarctica (polar desert), Antarctica
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name three countries with a coastline along the Mediterranean Sea.</summary>
+              Spain, Italy, Greece
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which country has the Great Barrier Reef?</summary>
+              Australia
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Identify the country where Mount Kilimanjaro is located.</summary>
+              Tanzania
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name the largest island in the world and the country it belongs to.</summary>
+              Greenland, Denmark
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name three famous volcanoes and the countries they are in.</summary>
+              Mount Vesuvius (Italy), Mount Fuji (Japan), Mauna Loa (United States)
+            </details>
+          </li>
+        </ol>
+        <h3>Borders & Geopolitics 🌐</h3>
+        <ol class="list-group list-group-flush" start="17">
+          <li class="list-group-item">
+            <details>
+              <summary>Which countries share a border with Germany?</summary>
+              Denmark, Poland, Czech Republic, Austria, Switzerland, France, Luxembourg, Belgium, Netherlands
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name all the countries that border France.</summary>
+              Spain, Andorra, Monaco, Italy, Switzerland, Germany, Luxembourg, Belgium (plus Brazil and Suriname through overseas territories)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which countries share a border with China?</summary>
+              India, Russia, Mongolia, Kazakhstan, Kyrgyzstan, Tajikistan, Afghanistan, Pakistan, Nepal, Bhutan, Myanmar, Laos, Vietnam, North Korea
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which two countries are separated by the Strait of Gibraltar?</summary>
+              Spain and Morocco
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name three countries that are landlocked in Africa.</summary>
+              Uganda, Rwanda, Zambia
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which countries border the Caspian Sea?</summary>
+              Russia, Kazakhstan, Turkmenistan, Iran, Azerbaijan
+            </details>
+          </li>
+        </ol>
+        <h3>World Facts 🌟</h3>
+        <ol class="list-group list-group-flush" start="23">
+          <li class="list-group-item">
+            <details>
+              <summary>Which country has the largest population in the world?</summary>
+              India (as of 2023, surpassed China)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name the smallest country by area in the world.</summary>
+              Vatican City
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which country has the most time zones?</summary>
+              France (12, due to overseas territories)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which countries use the Euro as their official currency?</summary>
+              Members of the Eurozone, e.g., Germany, France, Italy, Spain (19 countries in EU)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name the two countries that are completely surrounded by South Africa.</summary>
+              Lesotho and Eswatini (Swaziland)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which country’s flag has a maple leaf on it?</summary>
+              Canada
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which country is known as the Land of the Rising Sun?</summary>
+              Japan
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which country is the coldest in the world?</summary>
+              Russia (has the lowest recorded temperatures)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which country is the hottest in the world?</summary>
+              Libya (highest recorded temperature)
+            </details>
+          </li>
+        </ol>
+        <h3>Map Skills 🧭</h3>
+        <ol class="list-group list-group-flush" start="32">
+          <li class="list-group-item">
+            <details>
+              <summary>On a blank world map, mark these countries: Canada, Australia, India, Mexico, South Africa. <img src="https://upload.wikimedia.org/wikipedia/commons/c/cf/A_large_blank_world_map_with_oceans_marked_in_blue.PNG" alt="Blank World Map" class="img-fluid"></summary>
+              Canada (North America), Australia (Oceania), India (Asia), Mexico (North America), South Africa (Africa)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>On a blank map of Europe, mark: France, Italy, Spain, Germany, Poland. <img src="https://www.geoguessr.com/images/resize:fit:512:0/gravity:ce/plain/seterra/printables/en/europe-countries.png" alt="Blank Europe Map" class="img-fluid"></summary>
+              France (west), Italy (south), Spain (southwest), Germany (central), Poland (east)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Identify the continents each of these countries belong to: Argentina → ? Kenya → ? Sweden → ? Thailand → ?</summary>
+              Argentina → South America, Kenya → Africa, Sweden → Europe, Thailand → Asia
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Label the following oceans on a blank world map: Pacific, Atlantic, Indian, Southern, Arctic. (Use the world map above.)</summary>
+              Pacific (west), Atlantic (between Americas and Europe/Africa), Indian (south Asia), Southern (around Antarctica), Arctic (north)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which countries have both Atlantic and Mediterranean coastlines?</summary>
+              Spain, France, Morocco
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Identify these rivers on a world map: Nile, Amazon, Yangtze, Mississippi. (Use the world map above.)</summary>
+              Nile (Africa), Amazon (South America), Yangtze (China), Mississippi (USA)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Which countries are crossed by the equator?</summary>
+              Ecuador, Brazil, Indonesia, Kenya, Gabon
+            </details>
+          </li>
+        </ol>
+      </div>
+      <div class="tab-pane fade" id="ciphers" role="tabpanel">
+        <h2>Ciphers & Puzzles 🧩</h2>
+        <ol class="list-group list-group-flush">
+          <li class="list-group-item">
+            <details>
+              <summary>Decode this Caesar cipher with shift 5: “MJQQT”</summary>
+              HELLO
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Encode “WORLD” with a Caesar cipher shift = 2</summary>
+              YQTNF
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Binary to text: 01000001 01000100 01000001</summary>
+              ADA
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Text to binary: “CAT”</summary>
+              01000011 01000001 01010100
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Logic riddle: “I speak without a mouth and hear without ears. I have nobody, but I come alive with wind. What am I?”</summary>
+              Echo
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Mini puzzle: Arrange these historical events in chronological order: Printing Press invented, Wright Brothers flight, First computer built, Construction of the Great Pyramid</summary>
+              Construction of the Great Pyramid (c. 2580 BC), Printing Press invented (1440), Wright Brothers flight (1903), First computer built (1940s)
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Solve this puzzle: “I am a number. Double me and add 10, you get 30. What am I?”</summary>
+              10
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Caesar cipher challenge: Encode “CHESS” with shift 4</summary>
+              GLIWW
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Binary challenge: Convert 01001011 01001110 to text</summary>
+              KN
+            </details>
+          </li>
+        </ol>
+      </div>
+      <div class="tab-pane fade" id="mini" role="tabpanel">
+        <h2>Mini Games / Prompts 🎮</h2>
+        <h3>Codenames-style words 🕵️</h3>
+        <p>revolution, empire, castle, cipher, invasion, voyage, knight, pyramid, volcano, explorer</p>
+        <h3>Pictionary prompts ✏️</h3>
+        <ol class="list-group list-group-flush">
+          <li class="list-group-item">Draw a trebuchet</li>
+          <li class="list-group-item">Draw a pharaoh</li>
+          <li class="list-group-item">Draw a compass</li>
+          <li class="list-group-item">Draw a steam engine</li>
+          <li class="list-group-item">Draw the first computer</li>
+          <li class="list-group-item">Draw a famous landmark (Eiffel Tower, Pyramids, Great Wall)</li>
+        </ol>
+        <h3>Quick Challenges ⚡</h3>
+        <ol class="list-group list-group-flush">
+          <li class="list-group-item">
+            <details>
+              <summary>Name a country that starts with the letter “A”</summary>
+              Australia
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name three countries in South America</summary>
+              Brazil, Argentina, Chile
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name three countries in Africa</summary>
+              Nigeria, Egypt, South Africa
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name three European capitals</summary>
+              Paris, Berlin, Rome
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name three Asian capitals</summary>
+              Tokyo, Beijing, New Delhi
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name a historical event that happened in 1492</summary>
+              Christopher Columbus's voyage to the Americas
+            </details>
+          </li>
+          <li class="list-group-item">
+            <details>
+              <summary>Name a famous explorer from the 15th or 16th century</summary>
+              Christopher Columbus
+            </details>
+          </li>
+        </ol>
+      </div>
+      <div class="tab-pane fade" id="chessgame" role="tabpanel">
+        <h2>Interactive Chess Game ♟️🔥</h2>
+        <div class="chess-container">
+          <div id="chessboard" style="width: 400px"></div>
+          <label id="chessStatus" class="chessStatus"></label>
+          <button id="resetButton">Reset Game! 🚀</button>
+        </div>
+      </div>
+    </div>
+    <footer>🌌 This cosmic game night website was created by Benjamin! 🚀</footer>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/0.3.0/js/chessboard-0.3.0.min.js"></script>
+  <script>
+    // Chess game script (same as before)
+    let board, game;
+
+    let whiteSquareGrey = '#a9a9a9';
+    let blackSquareGrey = '#696969';
+
+    let config = {
+      position: 'start',
+      showNotation: true,
+      draggable: true,
+      dropOffBoard: 'snapback',
+      snapbackSpeed: 200,
+      snapSpeed: 50,
+      onDrop: onDrop,
+      onSnapEnd: onSnapEnd,
+      onDragStart: onDragStart,
+      onMouseoverSquare: onMouseoverSquare,
+      onMouseoutSquare: onMouseoutSquare
+    }
+
+    $(document).ready(function(){
+      game = new Chess();
+      board = ChessBoard('chessboard', config);
+
+      $('#resetButton').on('click', function(){
+        board.start(false);
+        game.reset();
+        removeRedSquares();
+      })
+
+      // Create moving stars for space background
+      const spaceBg = document.getElementById('space-bg');
+      for (let i = 0; i < 200; i++) { // 200 stars
+        const star = document.createElement('div');
+        star.classList.add('star');
+        star.style.width = star.style.height = `${Math.random() * 3 + 1}px`; // Size 1-4px
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDuration = `${Math.random() * 5 + 5}s`; // Speed 5-10s
+        star.style.opacity = Math.random() * 0.5 + 0.5; // Brightness
+        spaceBg.appendChild(star);
+      }
+    })
+
+    function onDrop(source, target){
+      removeGreySquares();
+
+      let move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+      })
+
+      if (move == null) return 'snapback'
+
+      removeRedSquares();
+      updateStatus();
+    }
+
+    function onSnapEnd () {
+      board.position(game.fen())
+    }
+
+    function onDragStart(source, piece){
+      if (game.game_over()) return false
+
+      if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+        return false
+      }
+    }
+
+    function updateStatus(){
+      let prevColor = (game.turn() === 'w') ? "Black" : "White";
+
+      if (game.in_checkmate()){
+        $("#chessStatus").html("Checkmate! " + prevColor + " wins. 🎉")
+      }
+
+      if (game.in_stalemate()) {
+        $("#chessStatus").html("Draw by stalemate. 😅")
+      }
+
+      if (game.in_threefold_repetition()){
+        $("#chessStatus").html("Draw by threefold repetition. 🔄")
+      }
+
+      if (game.insufficient_material()){
+        $("#chessStatus").html("Draw by insufficient material. 🛑")
+      }
+
+      if (game.in_check()){
+        let kingPosition = getKeyByValue(board.position(), game.turn() + 'K')
+        redSquare(kingPosition);
+      }
+    }
+
+    function greySquare(square) {
+      let $square = $('#chessboard .square-' + square)
+
+      let background = whiteSquareGrey
+      if ($square.hasClass('black-3c85d')) {
+        background = blackSquareGrey
+      }
+
+      $square.css('background', background)
+    }
+
+    function removeGreySquares(){
+      $('#chessboard .square-55d63').css('background', '')
+    }
+
+    function onMouseoverSquare(square, piece){
+      removeGreySquares()
+
+      let moves = game.moves({
+        square: square,
+        verbose: true
+      })
+
+      if (moves.length === 0) return
+
+      greySquare(square)
+
+      for (let i = 0; i < moves.length; i++) {
+        greySquare(moves[i].to)
+      }
+    }
+
+    function onMouseoutSquare(square, piece){
+      removeGreySquares()
+    }
+
+    function redSquare(square){
+      let $square = $('#chessboard .square-' + square)
+
+      $square.addClass('highlight-red-check')
+    }
+
+    function removeRedSquares(){
+      $('#chessboard .square-55d63').removeClass('highlight-red-check')
+    }
+
+    function getKeyByValue(object, value) {
+      return Object.keys(object).find(key => object[key] === value);
+    }
+
+    // Question and scoring functionality
+    $(document).ready(function() {
+      // Initialize leaderboard
+      let leaderboard = JSON.parse(localStorage.getItem('gameLeaderboard')) || [];
+      let currentPlayer = '';
+      
+      // Show leaderboard
+      function updateLeaderboard() {
+        const sortedLeaderboard = leaderboard.sort((a, b) => b.score - a.score);
+        let html = '';
+        sortedLeaderboard.forEach((entry, index) => {
+          const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '👾';
+          html += `
+            <div class="leaderboard-entry">
+              <span class="player-name">${medal} ${entry.name}</span>
+              <span class="player-score">${entry.score}/${entry.total}</span>
+            </div>
+          `;
+        });
+        $('#leaderboardEntries').html(html);
+      }
+      
+      // Handle name input
+      $('#startGame').click(function() {
+        const name = $('#playerName').val().trim();
+        if (name) {
+          currentPlayer = name;
+          $('#nameModal').fadeOut();
+          $('.container').css('filter', 'none');
+        }
+      });
+      
+      // Handle enter key for name input
+      $('#playerName').keypress(function(e) {
+        if (e.which === 13) {
+          $('#startGame').click();
+        }
+      });
+
+      // Initialize question system
+      let score = 0;
+      let questionsAnswered = 0;
+      const totalQuestions = $('.question').length;
+      $('#totalQuestions').text(totalQuestions);
+      
+      updateLeaderboard();
+
+      // Add question structure to all details elements
+      $('details').each(function() {
+        const content = $(this).find('summary').next().html();
+        if (!$(this).find('.question').length) {
+          const answer = content.split('\n')[0].trim();
+          $(this).find('summary').next().html(`
+            <div class="question" data-answer="${answer}">
+              ${content}
+              <div class="comment-section">
+                <input type="text" class="comment-input" placeholder="Type your answer here...">
+                <button class="submit-answer">Submit Answer</button>
+                <div class="answer-feedback"></div>
+              </div>
+            </div>
+          `);
+        }
+      });
+
+      // Handle answer submission
+      $(document).on('click', '.submit-answer', function() {
+        const questionDiv = $(this).closest('.question');
+        const userAnswer = questionDiv.find('.comment-input').val().trim().toLowerCase();
+        const correctAnswer = questionDiv.data('answer').toLowerCase();
+        const feedbackDiv = questionDiv.find('.answer-feedback');
+        
+        if (!questionDiv.hasClass('answered')) {
+          if (userAnswer.includes(correctAnswer) || correctAnswer.includes(userAnswer)) {
+            score++;
+            feedbackDiv.html('<span class="correct-answer">Correct! 🎉</span>');
+          } else {
+            feedbackDiv.html('<span class="incorrect-answer">Try again! The correct answer is: ' + correctAnswer + '</span>');
+          }
+          
+          questionsAnswered++;
+          $('#score').text(score);
+          questionDiv.addClass('answered');
+          
+          // Check if all questions are answered and update leaderboard
+          if (questionsAnswered === totalQuestions) {
+            // Add score to leaderboard
+            leaderboard = leaderboard.filter(entry => entry.name !== currentPlayer);
+            leaderboard.push({
+              name: currentPlayer,
+              score: score,
+              total: totalQuestions,
+              timestamp: Date.now()
+            });
+            
+            // Keep only top 10 scores
+            leaderboard.sort((a, b) => b.score - a.score || b.timestamp - a.timestamp);
+            leaderboard = leaderboard.slice(0, 10);
+            
+            // Save to localStorage
+            localStorage.setItem('gameLeaderboard', JSON.stringify(leaderboard));
+            updateLeaderboard();
+
+            if (score === totalQuestions) {
+              $('#winMessage').show();
+              alert(`🏆 Congratulations ${currentPlayer}! Perfect score! 🎉`);
+            } else {
+              const remaining = totalQuestions - score;
+              alert(`Game complete, ${currentPlayer}! You got ${score} out of ${totalQuestions} correct. ${remaining > 0 ? 'Try to improve your score!' : ''}`);
+            }
+          }
+        }
+      });
+
+      // Handle enter key in input fields
+      $(document).on('keypress', '.comment-input', function(e) {
+        if (e.which === 13) {
+          $(this).next('.submit-answer').click();
+        }
+      });
+
+      // Scroll functionality
+      const scrollBtn = $('<button class="scroll-down">↓</button>');
+      $('body').append(scrollBtn);
+
+      $(window).scroll(function() {
+        if ($(this).scrollTop() > 300) {
+          scrollBtn.fadeIn();
+        } else {
+          scrollBtn.fadeOut();
+        }
+      });
+
+      scrollBtn.click(function() {
+        $('html, body').animate({
+          scrollTop: $(document).height()
+        }, 1000);
+      });
+    });
+  </script>
+</body>
+</html>
